@@ -1,0 +1,603 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000000000000000000022 /* KeepsakeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000021 /* KeepsakeApp.swift */; };
+		A10000000000000000000024 /* LayoutKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000023 /* LayoutKind.swift */; };
+		A10000000000000000000026 /* ClipRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000025 /* ClipRecord.swift */; };
+		A10000000000000000000028 /* TapeRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000027 /* TapeRecord.swift */; };
+		A1000000000000000000002A /* SyncMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000029 /* SyncMath.swift */; };
+		A1000000000000000000002C /* Sync.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000002B /* Sync.swift */; };
+		A1000000000000000000002E /* ClipMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000002D /* ClipMetadata.swift */; };
+		A10000000000000000000030 /* Recorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000002F /* Recorder.swift */; };
+		A10000000000000000000032 /* Stitcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000031 /* Stitcher.swift */; };
+		A10000000000000000000034 /* KeepsakeCompositor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000033 /* KeepsakeCompositor.swift */; };
+		A10000000000000000000036 /* LibraryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000035 /* LibraryStore.swift */; };
+		A10000000000000000000038 /* TimeFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000037 /* TimeFormat.swift */; };
+		A1000000000000000000003A /* Thumbnails.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000039 /* Thumbnails.swift */; };
+		A1000000000000000000003C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000003B /* ContentView.swift */; };
+		A1000000000000000000003E /* RecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000003D /* RecordView.swift */; };
+		A10000000000000000000040 /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000003F /* CameraPreview.swift */; };
+		A10000000000000000000042 /* ClipsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000041 /* ClipsView.swift */; };
+		A10000000000000000000044 /* SyncStitchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000043 /* SyncStitchView.swift */; };
+		A10000000000000000000046 /* TapesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000045 /* TapesView.swift */; };
+		A10000000000000000000048 /* TapePlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000047 /* TapePlayerView.swift */; };
+		A1000000000000000000004A /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000049 /* ShareSheet.swift */; };
+		A1000000000000000000004C /* ThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000004B /* ThumbnailView.swift */; };
+		A1000000000000000000004F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000004E /* Assets.xcassets */; };
+		A10000000000000000000051 /* SyncMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000050 /* SyncMathTests.swift */; };
+		A10000000000000000000053 /* CompositionTimingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000052 /* CompositionTimingTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A1000000000000000000000C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A10000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A10000000000000000000002;
+			remoteInfo = Keepsake;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A10000000000000000000004 /* Keepsake.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Keepsake.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000005 /* KeepsakeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KeepsakeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000021 /* KeepsakeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepsakeApp.swift; sourceTree = "<group>"; };
+		A10000000000000000000023 /* LayoutKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutKind.swift; sourceTree = "<group>"; };
+		A10000000000000000000025 /* ClipRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipRecord.swift; sourceTree = "<group>"; };
+		A10000000000000000000027 /* TapeRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapeRecord.swift; sourceTree = "<group>"; };
+		A10000000000000000000029 /* SyncMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncMath.swift; sourceTree = "<group>"; };
+		A1000000000000000000002B /* Sync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sync.swift; sourceTree = "<group>"; };
+		A1000000000000000000002D /* ClipMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipMetadata.swift; sourceTree = "<group>"; };
+		A1000000000000000000002F /* Recorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recorder.swift; sourceTree = "<group>"; };
+		A10000000000000000000031 /* Stitcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stitcher.swift; sourceTree = "<group>"; };
+		A10000000000000000000033 /* KeepsakeCompositor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepsakeCompositor.swift; sourceTree = "<group>"; };
+		A10000000000000000000035 /* LibraryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryStore.swift; sourceTree = "<group>"; };
+		A10000000000000000000037 /* TimeFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeFormat.swift; sourceTree = "<group>"; };
+		A10000000000000000000039 /* Thumbnails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Thumbnails.swift; sourceTree = "<group>"; };
+		A1000000000000000000003B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A1000000000000000000003D /* RecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordView.swift; sourceTree = "<group>"; };
+		A1000000000000000000003F /* CameraPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreview.swift; sourceTree = "<group>"; };
+		A10000000000000000000041 /* ClipsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipsView.swift; sourceTree = "<group>"; };
+		A10000000000000000000043 /* SyncStitchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStitchView.swift; sourceTree = "<group>"; };
+		A10000000000000000000045 /* TapesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapesView.swift; sourceTree = "<group>"; };
+		A10000000000000000000047 /* TapePlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapePlayerView.swift; sourceTree = "<group>"; };
+		A10000000000000000000049 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
+		A1000000000000000000004B /* ThumbnailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbnailView.swift; sourceTree = "<group>"; };
+		A1000000000000000000004D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A1000000000000000000004E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A10000000000000000000050 /* SyncMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncMathTests.swift; sourceTree = "<group>"; };
+		A10000000000000000000052 /* CompositionTimingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompositionTimingTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A10000000000000000000008 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1000000000000000000000A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A10000000000000000000017 /* root */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000018 /* Keepsake */,
+				A1000000000000000000001C /* KeepsakeTests */,
+				A1000000000000000000001E /* Frameworks */,
+				A1000000000000000000001D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A10000000000000000000018 /* Keepsake */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000021 /* KeepsakeApp.swift */,
+				A1000000000000000000004D /* Info.plist */,
+				A1000000000000000000004E /* Assets.xcassets */,
+				A10000000000000000000019 /* Models */,
+				A1000000000000000000001A /* Views */,
+				A1000000000000000000001B /* Services */,
+			);
+			path = Keepsake;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000019 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000023 /* LayoutKind.swift */,
+				A10000000000000000000025 /* ClipRecord.swift */,
+				A10000000000000000000027 /* TapeRecord.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		A1000000000000000000001A /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A1000000000000000000003B /* ContentView.swift */,
+				A1000000000000000000003D /* RecordView.swift */,
+				A1000000000000000000003F /* CameraPreview.swift */,
+				A10000000000000000000041 /* ClipsView.swift */,
+				A10000000000000000000043 /* SyncStitchView.swift */,
+				A10000000000000000000045 /* TapesView.swift */,
+				A10000000000000000000047 /* TapePlayerView.swift */,
+				A10000000000000000000049 /* ShareSheet.swift */,
+				A1000000000000000000004B /* ThumbnailView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A1000000000000000000001B /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000029 /* SyncMath.swift */,
+				A1000000000000000000002B /* Sync.swift */,
+				A1000000000000000000002D /* ClipMetadata.swift */,
+				A1000000000000000000002F /* Recorder.swift */,
+				A10000000000000000000031 /* Stitcher.swift */,
+				A10000000000000000000033 /* KeepsakeCompositor.swift */,
+				A10000000000000000000035 /* LibraryStore.swift */,
+				A10000000000000000000037 /* TimeFormat.swift */,
+				A10000000000000000000039 /* Thumbnails.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		A1000000000000000000001C /* KeepsakeTests */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000050 /* SyncMathTests.swift */,
+				A10000000000000000000052 /* CompositionTimingTests.swift */,
+			);
+			path = KeepsakeTests;
+			sourceTree = "<group>";
+		};
+		A1000000000000000000001E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A1000000000000000000001D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000004 /* Keepsake.app */,
+				A10000000000000000000005 /* KeepsakeTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A10000000000000000000002 /* Keepsake */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A10000000000000000000013 /* Build configuration list for PBXNativeTarget "Keepsake" */;
+			buildPhases = (
+				A10000000000000000000006 /* Sources */,
+				A10000000000000000000008 /* Frameworks */,
+				A10000000000000000000007 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Keepsake;
+			productName = Keepsake;
+			productReference = A10000000000000000000004 /* Keepsake.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A10000000000000000000003 /* KeepsakeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A10000000000000000000016 /* Build configuration list for PBXNativeTarget "KeepsakeTests" */;
+			buildPhases = (
+				A10000000000000000000009 /* Sources */,
+				A1000000000000000000000A /* Frameworks */,
+				A1000000000000000000000B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A1000000000000000000000D /* PBXTargetDependency */,
+			);
+			name = KeepsakeTests;
+			productName = KeepsakeTests;
+			productReference = A10000000000000000000005 /* KeepsakeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A10000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				ORGANIZATIONNAME = Keepsake;
+				TargetAttributes = {
+					A10000000000000000000002 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					A10000000000000000000003 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = A10000000000000000000002;
+					};
+				};
+			};
+			buildConfigurationList = A10000000000000000000010 /* Build configuration list for PBXProject "Keepsake" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A10000000000000000000017;
+			productRefGroup = A1000000000000000000001D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A10000000000000000000002 /* Keepsake */,
+				A10000000000000000000003 /* KeepsakeTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A10000000000000000000007 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000000000000000000004F /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1000000000000000000000B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A10000000000000000000006 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000022 /* KeepsakeApp.swift in Sources */,
+				A10000000000000000000024 /* LayoutKind.swift in Sources */,
+				A10000000000000000000026 /* ClipRecord.swift in Sources */,
+				A10000000000000000000028 /* TapeRecord.swift in Sources */,
+				A1000000000000000000002A /* SyncMath.swift in Sources */,
+				A1000000000000000000002C /* Sync.swift in Sources */,
+				A1000000000000000000002E /* ClipMetadata.swift in Sources */,
+				A10000000000000000000030 /* Recorder.swift in Sources */,
+				A10000000000000000000032 /* Stitcher.swift in Sources */,
+				A10000000000000000000034 /* KeepsakeCompositor.swift in Sources */,
+				A10000000000000000000036 /* LibraryStore.swift in Sources */,
+				A10000000000000000000038 /* TimeFormat.swift in Sources */,
+				A1000000000000000000003A /* Thumbnails.swift in Sources */,
+				A1000000000000000000003C /* ContentView.swift in Sources */,
+				A1000000000000000000003E /* RecordView.swift in Sources */,
+				A10000000000000000000040 /* CameraPreview.swift in Sources */,
+				A10000000000000000000042 /* ClipsView.swift in Sources */,
+				A10000000000000000000044 /* SyncStitchView.swift in Sources */,
+				A10000000000000000000046 /* TapesView.swift in Sources */,
+				A10000000000000000000048 /* TapePlayerView.swift in Sources */,
+				A1000000000000000000004A /* ShareSheet.swift in Sources */,
+				A1000000000000000000004C /* ThumbnailView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000000009 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000051 /* SyncMathTests.swift in Sources */,
+				A10000000000000000000053 /* CompositionTimingTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A1000000000000000000000D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A10000000000000000000002 /* Keepsake */;
+			targetProxy = A1000000000000000000000C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		A1000000000000000000000E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		A1000000000000000000000F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		A10000000000000000000011 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Keepsake/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = NO;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.keepsake.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		A10000000000000000000012 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Keepsake/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = NO;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.keepsake.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		A10000000000000000000014 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.keepsake.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Keepsake.app/Keepsake";
+			};
+			name = Debug;
+		};
+		A10000000000000000000015 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.keepsake.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Keepsake.app/Keepsake";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A10000000000000000000010 /* Build configuration list for PBXProject "Keepsake" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1000000000000000000000E /* Debug */,
+				A1000000000000000000000F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A10000000000000000000013 /* Build configuration list for PBXNativeTarget "Keepsake" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10000000000000000000011 /* Debug */,
+				A10000000000000000000012 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A10000000000000000000016 /* Build configuration list for PBXNativeTarget "KeepsakeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10000000000000000000014 /* Debug */,
+				A10000000000000000000015 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A10000000000000000000001 /* Project object */;
+}
