@@ -13,6 +13,7 @@ struct StitchRequest {
     var startB: Date
     var nudgeSeconds: TimeInterval
     var layout: LayoutKind
+    var soundtrack: Soundtrack
     var includeTitleCard: Bool
 }
 
@@ -23,7 +24,7 @@ struct StitchBuild {
     var displayTitle: String
 }
 
-enum StitchError: LocalizedError {
+enum StitchError: LocalizedError, Equatable {
     case missingVideo(String)
     case nothingToExport
     case exportFailed(String)
@@ -64,11 +65,11 @@ enum Stitcher {
         try videoA.insertTimeRange(loadedA.videoRange, of: loadedA.videoTrack, at: Sync.cmTime(milliseconds: plan.offsetA.milliseconds))
         try videoB.insertTimeRange(loadedB.videoRange, of: loadedB.videoTrack, at: Sync.cmTime(milliseconds: plan.offsetB.milliseconds))
 
-        if let audioTrack = loadedA.audioTrack {
+        if request.soundtrack != .otherPhone, let audioTrack = loadedA.audioTrack {
             let audio = try addAudioTrack(to: composition)
             try insertAudio(audioTrack, range: loadedA.audioRange, into: audio, at: plan.offsetA.milliseconds, limit: loadedA.videoRange.duration)
         }
-        if let audioTrack = loadedB.audioTrack {
+        if request.soundtrack != .thisPhone, let audioTrack = loadedB.audioTrack {
             let audio = try addAudioTrack(to: composition)
             try insertAudio(audioTrack, range: loadedB.audioRange, into: audio, at: plan.offsetB.milliseconds, limit: loadedB.videoRange.duration)
         }
@@ -117,6 +118,7 @@ enum Stitcher {
     static func export(
         _ build: StitchBuild,
         to url: URL,
+        control: ExportControl,
         progress: @escaping (Double) -> Void
     ) async throws {
         if FileManager.default.fileExists(atPath: url.path) {
@@ -205,6 +207,12 @@ enum Stitcher {
             writer.cancelWriting()
             throw StitchError.exportFailed(reader.error?.localizedDescription ?? "Could not read the clips.")
         }
+        control.attach(reader)
+        if control.isCancelled {
+            reader.cancelReading()
+            writer.cancelWriting()
+            throw StitchError.cancelled
+        }
 
         let duration = try await composition.load(.duration)
         let durationSeconds = CMTimeGetSeconds(duration)
@@ -216,6 +224,7 @@ enum Stitcher {
             audioOutput: audioOutput,
             audioInput: audioInput,
             durationSeconds: durationSeconds,
+            control: control,
             progress: progress
         )
         succeeded = true
@@ -304,44 +313,24 @@ enum Stitcher {
         orientationB: CGImagePropertyOrientation,
         title: TitleCardContent?
     ) -> [KeepsakeInstruction] {
-        var instructions: [KeepsakeInstruction] = []
-        var cursor = CMTime.zero
-        for (index, segment) in segments.enumerated() {
-            if CMTimeCompare(cursor, total) >= 0 { break }
-            let isLast = index == segments.count - 1
-            let proposed = isLast ? total : CMTimeMinimum(Sync.cmTime(milliseconds: segment.end.milliseconds), total)
-            let end = CMTimeMaximum(proposed, cursor)
-            let span = CMTimeSubtract(end, cursor)
-            if CMTimeCompare(span, .zero) <= 0 { continue }
-            instructions.append(
-                KeepsakeInstruction(
-                    timeRange: CMTimeRange(start: cursor, duration: span),
-                    trackA: segment.includesA ? videoA : nil,
-                    trackB: segment.includesB ? videoB : nil,
-                    rectA: rectA,
-                    rectB: rectB,
-                    orientationA: orientationA,
-                    orientationB: orientationB,
-                    title: title
-                )
-            )
-            cursor = end
-        }
-        if instructions.isEmpty, CMTimeCompare(total, .zero) > 0 {
-            instructions.append(
-                KeepsakeInstruction(
-                    timeRange: CMTimeRange(start: .zero, duration: total),
-                    trackA: videoA,
-                    trackB: videoB,
-                    rectA: rectA,
-                    rectB: rectB,
-                    orientationA: orientationA,
-                    orientationB: orientationB,
-                    title: title
-                )
+        let ranges = Sync.instructionRanges(segments: segments, total: total)
+        return ranges.map { range in
+            let midpoint = CMTimeAdd(range.start, CMTimeMultiplyByFloat64(range.duration, multiplier: 0.5))
+            let midMs = Sync.milliseconds(midpoint)
+            let segment = segments.first { midMs >= $0.start.milliseconds && midMs < $0.end.milliseconds }
+            let includesA = segment?.includesA ?? true
+            let includesB = segment?.includesB ?? true
+            return KeepsakeInstruction(
+                timeRange: range,
+                trackA: includesA ? videoA : nil,
+                trackB: includesB ? videoB : nil,
+                rectA: rectA,
+                rectB: rectB,
+                orientationA: orientationA,
+                orientationB: orientationB,
+                title: title
             )
         }
-        return instructions
     }
 
     private static func addVideoTrack(to composition: AVMutableComposition) throws -> AVMutableCompositionTrack {
@@ -379,24 +368,39 @@ enum Stitcher {
         audioOutput: AVAssetReaderOutput?,
         audioInput: AVAssetWriterInput?,
         durationSeconds: Double,
+        control: ExportControl,
         progress: @escaping (Double) -> Void
     ) async throws {
         let state = ExportState()
         let group = DispatchGroup()
         let videoPump = PumpGate()
         let audioPump = PumpGate()
+        let progressGate = ProgressGate()
         let includeAudio = audioOutput != nil && audioInput != nil
         group.enter()
         if includeAudio {
             group.enter()
         }
 
-        let videoQueue = DispatchQueue(label: "com.keepsake.export.video")
-        videoInput.requestMediaDataWhenReady(on: videoQueue) {
+        // One serial queue so a failure can finish every input on the queue
+        // requestMediaDataWhenReady was given. A failed track used to mark the
+        // other input finished from the wrong queue, which can stall the export.
+        let queue = DispatchQueue(label: "com.keepsake.export")
+        let stopAll: () -> Void = {
+            videoPump.finish(videoInput, group: group)
+            if includeAudio, let audioInput {
+                audioPump.finish(audioInput, group: group)
+            }
+        }
+
+        videoInput.requestMediaDataWhenReady(on: queue) {
             while videoInput.isReadyForMoreMediaData {
-                if state.hasFailed {
-                    videoInput.markAsFinished()
-                    videoPump.leaveOnce(group)
+                if state.hasFailed || control.isCancelled {
+                    if control.isCancelled {
+                        state.fail(StitchError.cancelled)
+                        reader.cancelReading()
+                    }
+                    stopAll()
                     return
                 }
                 let sample: CMSampleBuffer? = autoreleasepool { videoOutput.copyNextSampleBuffer() }
@@ -404,42 +408,34 @@ enum Stitcher {
                     if !videoInput.append(sample) {
                         state.fail(writer.error ?? StitchError.exportFailed("Could not write the video."))
                         reader.cancelReading()
-                        videoInput.markAsFinished()
-                        audioInput?.markAsFinished()
-                        videoPump.leaveOnce(group)
-                        if includeAudio {
-                            audioPump.leaveOnce(group)
-                        }
+                        stopAll()
                         return
                     }
                     let timestamp = CMSampleBufferGetPresentationTimeStamp(sample)
                     let seconds = CMTimeGetSeconds(timestamp)
                     if seconds.isFinite, durationSeconds > 0 {
-                        progress(min(0.99, max(0, seconds / durationSeconds)))
-                    }
-                } else {
-                    if reader.status == .failed, let error = reader.error {
-                        state.fail(error)
-                        reader.cancelReading()
-                        audioInput?.markAsFinished()
-                        if includeAudio {
-                            audioPump.leaveOnce(group)
+                        let value = min(0.99, max(0, seconds / durationSeconds))
+                        if progressGate.shouldReport(value) {
+                            progress(value)
                         }
                     }
-                    videoInput.markAsFinished()
-                    videoPump.leaveOnce(group)
+                } else {
+                    noteReaderEnd(reader, control: control, state: state)
+                    videoPump.finish(videoInput, group: group)
                     return
                 }
             }
         }
 
         if includeAudio, let audioOutput, let audioInput {
-            let audioQueue = DispatchQueue(label: "com.keepsake.export.audio")
-            audioInput.requestMediaDataWhenReady(on: audioQueue) {
+            audioInput.requestMediaDataWhenReady(on: queue) {
                 while audioInput.isReadyForMoreMediaData {
-                    if state.hasFailed {
-                        audioInput.markAsFinished()
-                        audioPump.leaveOnce(group)
+                    if state.hasFailed || control.isCancelled {
+                        if control.isCancelled {
+                            state.fail(StitchError.cancelled)
+                            reader.cancelReading()
+                        }
+                        stopAll()
                         return
                     }
                     let sample: CMSampleBuffer? = autoreleasepool { audioOutput.copyNextSampleBuffer() }
@@ -447,18 +443,12 @@ enum Stitcher {
                         if !audioInput.append(sample) {
                             state.fail(writer.error ?? StitchError.exportFailed("Could not write the audio."))
                             reader.cancelReading()
-                            audioInput.markAsFinished()
-                            videoInput.markAsFinished()
-                            audioPump.leaveOnce(group)
-                            videoPump.leaveOnce(group)
+                            stopAll()
                             return
                         }
                     } else {
-                        if reader.status == .failed, let error = reader.error {
-                            state.fail(error)
-                        }
-                        audioInput.markAsFinished()
-                        audioPump.leaveOnce(group)
+                        noteReaderEnd(reader, control: control, state: state)
+                        audioPump.finish(audioInput, group: group)
                         return
                     }
                 }
@@ -482,6 +472,59 @@ enum Stitcher {
             }
         }
     }
+
+    private static func noteReaderEnd(_ reader: AVAssetReader, control: ExportControl, state: ExportState) {
+        if control.isCancelled || reader.status == .cancelled {
+            state.fail(StitchError.cancelled)
+        } else if reader.status == .failed, let error = reader.error {
+            state.fail(error)
+        }
+    }
+}
+
+final class ExportControl: @unchecked Sendable {
+    private let lock = NSLock()
+    private var cancelled = false
+    private var reader: AVAssetReader?
+
+    func attach(_ reader: AVAssetReader) {
+        lock.lock()
+        self.reader = reader
+        let shouldCancel = cancelled
+        lock.unlock()
+        if shouldCancel {
+            reader.cancelReading()
+        }
+    }
+
+    func cancel() {
+        lock.lock()
+        cancelled = true
+        let reader = self.reader
+        lock.unlock()
+        reader?.cancelReading()
+    }
+
+    var isCancelled: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return cancelled
+    }
+}
+
+private final class ProgressGate: @unchecked Sendable {
+    private let lock = NSLock()
+    private var last = -1.0
+
+    func shouldReport(_ value: Double) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        if value - last >= 0.01 {
+            last = value
+            return true
+        }
+        return false
+    }
 }
 
 private final class ExportState: @unchecked Sendable {
@@ -502,15 +545,17 @@ private final class ExportState: @unchecked Sendable {
 
 private final class PumpGate: @unchecked Sendable {
     private let lock = NSLock()
-    private var left = false
-    func leaveOnce(_ group: DispatchGroup) {
+    private var finished = false
+
+    /// Marks the input finished on the export queue, and leaves the group once.
+    func finish(_ input: AVAssetWriterInput, group: DispatchGroup) {
         lock.lock()
-        let shouldLeave = !left
-        left = true
+        let shouldFinish = !finished
+        finished = true
         lock.unlock()
-        if shouldLeave {
-            group.leave()
-        }
+        guard shouldFinish else { return }
+        input.markAsFinished()
+        group.leave()
     }
 }
 
@@ -519,12 +564,25 @@ final class StitchSession: ObservableObject {
     @Published var progress: Double = 0
     @Published var isRunning = false
 
-    func begin() {
+    private var control: ExportControl?
+    private(set) var userCancelled = false
+
+    func begin() -> ExportControl {
+        let control = ExportControl()
+        self.control = control
+        userCancelled = false
         isRunning = true
         progress = 0
+        return control
+    }
+
+    func cancel() {
+        userCancelled = true
+        control?.cancel()
     }
 
     func end() {
         isRunning = false
+        control = nil
     }
 }

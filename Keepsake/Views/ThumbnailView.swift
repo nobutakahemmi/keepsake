@@ -3,6 +3,7 @@ import UIKit
 
 struct ThumbnailView: View {
     let url: URL
+    var sampleSeconds: TimeInterval = 0.5
     @State private var image: UIImage?
 
     var body: some View {
@@ -23,8 +24,8 @@ struct ThumbnailView: View {
         .frame(width: 72, height: 72)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .accessibilityHidden(true)
-        .task(id: url) {
-            image = await Thumbnails.image(for: url)
+        .task(id: "\(url.path)|\(sampleSeconds)") {
+            image = await Thumbnails.image(for: url, sampleSeconds: sampleSeconds)
         }
     }
 }

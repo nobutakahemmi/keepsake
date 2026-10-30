@@ -50,7 +50,12 @@ struct TapesView: View {
     private func tapeRow(_ tape: TapeRecord) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top, spacing: 12) {
-                ThumbnailView(url: library.tapeURL(tape))
+                ThumbnailView(
+                    url: library.tapeURL(tape),
+                    sampleSeconds: tape.includesTitleCard
+                        ? (TimeInterval(SyncMath.titleCardMilliseconds) / 1000) + 0.5
+                        : 0.5
+                )
                 VStack(alignment: .leading, spacing: 4) {
                     Text(tape.title)
                         .font(.headline)
