@@ -1,5 +1,6 @@
 import AVKit
 import SwiftUI
+import UIKit
 
 struct SyncStitchView: View {
     @ObservedObject var library: LibraryStore
@@ -8,6 +9,7 @@ struct SyncStitchView: View {
     @State private var clipBID: UUID?
     @State private var nudge: Double = 0
     @State private var layout: LayoutKind = .sideBySide
+    @State private var soundtrack: Soundtrack = .both
     @State private var includeTitle = true
     @State private var player = AVPlayer()
     @State private var previewMessage: String?
@@ -74,7 +76,7 @@ struct SyncStitchView: View {
 
     private var previewToken: String {
         let milliseconds = SyncMath.snappedNudge(milliseconds: Int64((nudge * 1000).rounded()))
-        return "\(clipAID?.uuidString ?? "-")|\(clipBID?.uuidString ?? "-")|\(milliseconds)|\(layout.rawValue)|\(includeTitle)"
+        return "\(clipAID?.uuidString ?? "-")|\(clipBID?.uuidString ?? "-")|\(milliseconds)|\(layout.rawValue)|\(soundtrack.rawValue)|\(includeTitle)"
     }
 
     private var snappedNudgeText: String {
@@ -89,7 +91,7 @@ struct SyncStitchView: View {
             Picker("This phone", selection: $clipAID) {
                 Text("Choose").tag(nil as UUID?)
                 ForEach(library.clips) { clip in
-                    Text(clip.displayName).tag(clip.id as UUID?)
+                    Text(clipChoiceLabel(clip)).tag(clip.id as UUID?)
                 }
             }
             .accessibilityLabel("Clip from this phone")
@@ -97,7 +99,7 @@ struct SyncStitchView: View {
             Picker("Other phone", selection: $clipBID) {
                 Text("Choose").tag(nil as UUID?)
                 ForEach(library.clips) { clip in
-                    Text(clip.displayName).tag(clip.id as UUID?)
+                    Text(clipChoiceLabel(clip)).tag(clip.id as UUID?)
                 }
             }
             .accessibilityLabel("Clip from the other phone")
@@ -159,6 +161,20 @@ struct SyncStitchView: View {
             .labelsHidden()
             .accessibilityLabel("Layout")
 
+            Text("Sound")
+                .font(.body)
+            Picker("Sound", selection: $soundtrack) {
+                ForEach(Soundtrack.allCases) { option in
+                    Text(option.title).tag(option)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .accessibilityLabel("Sound")
+            Text("Use one phone’s microphone when both phones are in the same room. Both plays the two recordings together.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+
             Toggle("Title card", isOn: $includeTitle)
             Text("Shows both names and the date for the first 3 seconds. The sound keeps playing underneath.")
                 .font(.footnote)
@@ -208,6 +224,10 @@ struct SyncStitchView: View {
             .accessibilityHint("Saves a new video in the Tapes tab.")
 
             if stitchSession.isRunning {
+                Button("Cancel") {
+                    stitchSession.cancel()
+                }
+                .accessibilityHint("Stops making the keepsake.")
                 ProgressView(value: stitchSession.progress) {
                     Text("Making your keepsake")
                 } currentValueLabel: {
@@ -217,6 +237,10 @@ struct SyncStitchView: View {
                 .accessibilityValue(Text("\(Int((stitchSession.progress * 100).rounded())) percent"))
             }
         }
+    }
+
+    private func clipChoiceLabel(_ clip: ClipRecord) -> String {
+        "\(clip.displayName), \(TimeFormat.dayAndTime(clip.startDate))"
     }
 
     private func selectDefaults() {
@@ -251,6 +275,7 @@ struct SyncStitchView: View {
             startB: clipB.startDate,
             nudgeSeconds: nudge,
             layout: layout,
+            soundtrack: soundtrack,
             includeTitleCard: includeTitle
         )
     }
@@ -285,14 +310,24 @@ struct SyncStitchView: View {
         guard let request = makeRequest() else { return }
         player.pause()
         player.replaceCurrentItem(with: nil)
-        stitchSession.begin()
-        defer { stitchSession.end() }
+        let control = stitchSession.begin()
+        let background = StitchBackgroundTask()
+        background.begin(name: "Stitch keepsake") {
+            control.cancel()
+        }
+        defer {
+            stitchSession.end()
+            background.end()
+        }
         let temp = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
             .appendingPathExtension("mp4")
         do {
             let build = try await Stitcher.build(request)
-            try await Stitcher.export(build, to: temp) { value in
+            if control.isCancelled {
+                throw StitchError.cancelled
+            }
+            try await Stitcher.export(build, to: temp, control: control) { value in
                 Task { @MainActor in
                     stitchSession.progress = value
                 }
@@ -308,9 +343,45 @@ struct SyncStitchView: View {
             )
             savedTape = tape
             showSaved = true
+        } catch is CancellationError {
+            try? FileManager.default.removeItem(at: temp)
+            explainIfBackgroundEnded()
+        } catch StitchError.cancelled {
+            try? FileManager.default.removeItem(at: temp)
+            explainIfBackgroundEnded()
         } catch {
             try? FileManager.default.removeItem(at: temp)
             errorMessage = error.localizedDescription
         }
+    }
+
+    private func explainIfBackgroundEnded() {
+        guard !stitchSession.userCancelled else { return }
+        errorMessage = "Keepsake could not finish after you left the app. Stay on this screen and try again."
+    }
+}
+
+/// Keeps a stitch running for a short time after you leave the app, then stops it.
+private final class StitchBackgroundTask {
+    private let lock = NSLock()
+    private var identifier: UIBackgroundTaskIdentifier = .invalid
+
+    func begin(name: String, onExpiration: @escaping () -> Void) {
+        let task = UIApplication.shared.beginBackgroundTask(withName: name) { [weak self] in
+            onExpiration()
+            self?.end()
+        }
+        lock.lock()
+        identifier = task
+        lock.unlock()
+    }
+
+    func end() {
+        lock.lock()
+        let current = identifier
+        identifier = .invalid
+        lock.unlock()
+        guard current != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(current)
     }
 }

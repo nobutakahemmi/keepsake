@@ -16,3 +16,23 @@ enum LayoutKind: String, Codable, CaseIterable, Identifiable {
         }
     }
 }
+
+/// Which recorded microphones are mixed into the keepsake.
+enum Soundtrack: String, Codable, CaseIterable, Identifiable {
+    case both
+    case thisPhone
+    case otherPhone
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .both:
+            return "Both"
+        case .thisPhone:
+            return "This phone"
+        case .otherPhone:
+            return "Other phone"
+        }
+    }
+}

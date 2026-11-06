@@ -139,7 +139,18 @@ struct RecordView: View {
             do {
                 let clip = try await recorder.record()
                 try library.addRecording(clip)
-                showSaved = true
+                if clip.endedByInterruption || !clip.metadataEmbedded {
+                    var parts: [String] = ["The recording was saved. Find it on the Clips tab."]
+                    if clip.endedByInterruption {
+                        parts.append("It stopped early because the camera was interrupted.")
+                    }
+                    if !clip.metadataEmbedded {
+                        parts.append("The start time is not in the video yet, so Share stays off until you tap Repair.")
+                    }
+                    alertMessage = parts.joined(separator: " ")
+                } else {
+                    showSaved = true
+                }
             } catch {
                 alertMessage = error.localizedDescription
             }

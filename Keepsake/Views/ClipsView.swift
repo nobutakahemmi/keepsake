@@ -10,6 +10,7 @@ struct ClipsView: View {
     @State private var shareItem: ShareURL?
     @State private var renameTarget: ClipRecord?
     @State private var pendingDelete: ClipRecord?
+    @State private var repairingID: UUID?
 
     var body: some View {
         NavigationStack {
@@ -136,6 +137,10 @@ struct ClipsView: View {
                     Text("Start time was not in the file. Sync will use the time you imported it.")
                         .font(.footnote)
                 }
+                if !clip.metadataEmbedded {
+                    Text("Share is off until the start time is stored in the video.")
+                        .font(.footnote)
+                }
             }
             .accessibilityElement(children: .combine)
 
@@ -143,8 +148,26 @@ struct ClipsView: View {
                 Button("Share") {
                     shareItem = ShareURL(url: library.clipURL(clip))
                 }
+                .disabled(!clip.metadataEmbedded)
                 .accessibilityLabel("Share \(clip.displayName)")
-                .accessibilityHint("AirDrop this video to the other iPhone.")
+                .accessibilityHint(
+                    clip.metadataEmbedded
+                        ? "AirDrop this video to the other iPhone."
+                        : "Unavailable until you tap Repair."
+                )
+
+                if !clip.metadataEmbedded {
+                    Button(repairingID == clip.id ? "Repairing" : "Repair") {
+                        repairingID = clip.id
+                        Task {
+                            await library.repairMetadata(clip)
+                            repairingID = nil
+                        }
+                    }
+                    .disabled(repairingID == clip.id)
+                    .accessibilityLabel("Repair \(clip.displayName)")
+                    .accessibilityHint("Stores the start time in the video so it can be shared.")
+                }
 
                 Button("Rename") {
                     renameTarget = clip

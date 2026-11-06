@@ -4,6 +4,8 @@ import Foundation
 struct ClipSidecar: Codable, Equatable {
     var startTimestampMilliseconds: Int64
     var displayName: String
+    var durationMilliseconds: Int64?
+    var metadataEmbedded: Bool?
 }
 
 enum ClipMetadataError: LocalizedError {
@@ -64,10 +66,18 @@ enum ClipMetadata {
         return [startItem, nameItem, titleItem, creationItem, quickTimeCreation]
     }
 
-    static func writeSidecar(start: Date, displayName: String, beside mediaURL: URL) throws {
+    static func writeSidecar(
+        start: Date,
+        displayName: String,
+        beside mediaURL: URL,
+        durationMilliseconds: Int64? = nil,
+        metadataEmbedded: Bool = true
+    ) throws {
         let sidecar = ClipSidecar(
             startTimestampMilliseconds: TimestampCodec.milliseconds(from: start),
-            displayName: displayName
+            displayName: displayName,
+            durationMilliseconds: durationMilliseconds,
+            metadataEmbedded: metadataEmbedded
         )
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -100,8 +110,34 @@ enum ClipMetadata {
             try? FileManager.default.removeItem(at: destination)
             throw ClipMetadataError.exportFailed(error.localizedDescription)
         }
-        try writeSidecar(start: start, displayName: displayName, beside: destination)
+        try writeSidecar(start: start, displayName: displayName, beside: destination, metadataEmbedded: true)
         return destination
+    }
+
+    /// Replaces `url` with a copy that stores the start time and name inside the movie.
+    static func embedInPlace(
+        url: URL,
+        start: Date,
+        displayName: String,
+        durationMilliseconds: Int64? = nil
+    ) async throws {
+        let exported = try await embed(source: url, start: start, displayName: displayName)
+        let exportedSidecar = sidecarURL(for: exported)
+        do {
+            _ = try FileManager.default.replaceItemAt(url, withItemAt: exported)
+        } catch {
+            try? FileManager.default.removeItem(at: exported)
+            try? FileManager.default.removeItem(at: exportedSidecar)
+            throw error
+        }
+        try? FileManager.default.removeItem(at: exportedSidecar)
+        try writeSidecar(
+            start: start,
+            displayName: displayName,
+            beside: url,
+            durationMilliseconds: durationMilliseconds,
+            metadataEmbedded: true
+        )
     }
 
     static func read(from url: URL) async -> Payload {
@@ -110,7 +146,11 @@ enum ClipMetadata {
 
         if let metadata = try? await asset.load(.metadata) {
             for item in metadata {
-                guard let identifier = try? await item.load(.identifier) else { continue }
+                // `identifier` is derived from the item's key and is not an async property.
+                // Load those first so the identifier is filled in on the iOS 18 SDK.
+                _ = try? await item.load(.keySpace)
+                _ = try? await item.load(.key)
+                guard let identifier = item.identifier else { continue }
                 let stringValue = try? await item.load(.stringValue)
                 if matches(identifier, startIdentifier) {
                     if let stringValue, let date = TimestampCodec.date(fromStored: stringValue) {

@@ -44,7 +44,8 @@ final class PreviewView: UIView {
         }
         if connection.isVideoMirroringSupported {
             connection.automaticallyAdjustsVideoMirroring = false
-            connection.isVideoMirrored = true
+            // Match the movie file, which is saved unmirrored so the other person sees you as they did.
+            connection.isVideoMirrored = false
         }
     }
 }

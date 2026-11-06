@@ -7,6 +7,9 @@ struct RecordedClip {
     var start: Date
     var displayName: String
     var duration: TimeInterval
+    /// False when the start time exists only in the sidecar, so Share would drop it.
+    var metadataEmbedded: Bool
+    var endedByInterruption: Bool
 }
 
 enum RecorderError: LocalizedError {
@@ -55,13 +58,22 @@ final class Recorder: NSObject, ObservableObject {
     private let movieOutput = AVCaptureMovieFileOutput()
     private var isConfigured = false
     private var isPreparing = false
+    private var isObserving = false
     private var recordingName = ""
+    private var endedByInterruption = false
+    private var interruptionObservers: [NSObjectProtocol] = []
     private var finishContinuation: CheckedContinuation<RecordedClip, Error>?
 
     override init() {
         let deviceName = UIDevice.current.name.trimmingCharacters(in: .whitespacesAndNewlines)
         displayName = deviceName.isEmpty ? "Me" : deviceName
         super.init()
+    }
+
+    deinit {
+        for observer in interruptionObservers {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
 
     func prepare() {
@@ -136,6 +148,7 @@ final class Recorder: NSObject, ObservableObject {
                 try await configureSession()
                 isConfigured = true
             }
+            startObserving()
             await startRunning()
             if phase != .recording && phase != .saving {
                 phase = .ready
@@ -237,39 +250,134 @@ final class Recorder: NSObject, ObservableObject {
         UIApplication.shared.isIdleTimerDisabled = false
         let start = recordingStartedAt ?? Date()
         let name = recordingName
+        let interrupted = endedByInterruption
+        endedByInterruption = false
         recordingStartedAt = nil
 
         let nsError = error as NSError?
         let producedFile = (nsError?.userInfo[AVErrorRecordingSuccessfullyFinishedKey] as? Bool) ?? (error == nil)
         guard producedFile, FileManager.default.fileExists(atPath: url.path) else {
-            phase = .ready
+            phase = interrupted ? .failed : .ready
             let message = error?.localizedDescription ?? "The recording was not saved."
-            failureMessage = message
-            complete(.failure(RecorderError.failed(message)))
+            failureMessage = interrupted ? interruptionMessage(fallback: message) : message
+            complete(.failure(RecorderError.failed(failureMessage ?? message)))
             return
         }
 
         phase = .saving
         Task {
             let embedded: URL
+            let metadataEmbedded: Bool
             do {
                 embedded = try await ClipMetadata.embed(source: url, start: start, displayName: name)
                 try? FileManager.default.removeItem(at: url)
+                metadataEmbedded = true
             } catch {
-                try? ClipMetadata.writeSidecar(start: start, displayName: name, beside: url)
                 embedded = url
+                metadataEmbedded = false
             }
             let durationMs = await ClipMetadata.durationMilliseconds(of: embedded)
             let clip = RecordedClip(
                 url: embedded,
                 start: start,
                 displayName: name,
-                duration: TimeInterval(durationMs) / 1000
+                duration: TimeInterval(durationMs) / 1000,
+                metadataEmbedded: metadataEmbedded,
+                endedByInterruption: interrupted
             )
-            self.phase = .ready
-            self.failureMessage = nil
+            if interrupted {
+                self.phase = .failed
+                self.failureMessage = self.interruptionMessage(fallback: "The camera was interrupted.")
+            } else {
+                self.phase = .ready
+                self.failureMessage = nil
+            }
             self.complete(.success(clip))
         }
+    }
+
+    private func startObserving() {
+        guard !isObserving else { return }
+        isObserving = true
+        let center = NotificationCenter.default
+        let captureSession = session
+        interruptionObservers.append(
+            center.addObserver(forName: .AVCaptureSessionWasInterrupted, object: captureSession, queue: .main) { [weak self] notification in
+                Task { @MainActor in
+                    self?.handleInterruption(notification)
+                }
+            }
+        )
+        interruptionObservers.append(
+            center.addObserver(forName: .AVCaptureSessionInterruptionEnded, object: captureSession, queue: .main) { [weak self] _ in
+                Task { @MainActor in
+                    self?.handleInterruptionEnded()
+                }
+            }
+        )
+        interruptionObservers.append(
+            center.addObserver(forName: .AVCaptureSessionRuntimeError, object: captureSession, queue: .main) { [weak self] notification in
+                Task { @MainActor in
+                    self?.handleRuntimeError(notification)
+                }
+            }
+        )
+    }
+
+    private func handleInterruption(_ notification: Notification) {
+        let raw = notification.userInfo?[AVCaptureSessionInterruptionReasonKey] as? Int
+        let reason = raw.flatMap(AVCaptureSession.InterruptionReason.init(rawValue:))
+        let message = interruptionMessage(for: reason)
+        failureMessage = message
+        if phase == .recording {
+            endedByInterruption = true
+            stop()
+        } else if phase == .ready || phase == .preparing || phase == .idle {
+            phase = .failed
+        }
+    }
+
+    private func handleInterruptionEnded() {
+        guard phase == .failed, finishContinuation == nil else { return }
+        prepare()
+    }
+
+    private func handleRuntimeError(_ notification: Notification) {
+        let error = notification.userInfo?[AVCaptureSessionErrorKey] as? AVError
+        if phase == .recording {
+            endedByInterruption = true
+            failureMessage = error?.localizedDescription ?? interruptionMessage(fallback: "The camera stopped.")
+            stop()
+            return
+        }
+        if error?.code == .mediaServicesWereReset {
+            isConfigured = false
+            phase = .failed
+            failureMessage = "The camera reset. Tap Try Again."
+            return
+        }
+        phase = .failed
+        failureMessage = error?.localizedDescription ?? "The camera stopped."
+    }
+
+    private func interruptionMessage(for reason: AVCaptureSession.InterruptionReason?) -> String {
+        switch reason {
+        case .audioDeviceInUseByAnotherClient:
+            return "The microphone is being used by another app."
+        case .videoDeviceInUseByAnotherClient:
+            return "The camera is being used by another app."
+        case .videoDeviceNotAvailableInBackground:
+            return "The camera stopped because Keepsake was in the background."
+        case .videoDeviceNotAvailableDueToSystemPressure:
+            return "The camera stopped because this iPhone is too busy."
+        default:
+            return "The camera was interrupted."
+        }
+    }
+
+    private func interruptionMessage(fallback: String) -> String {
+        let current = failureMessage?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return current.isEmpty ? fallback : current
     }
 
     private func complete(_ result: Result<RecordedClip, Error>) {

@@ -66,6 +66,7 @@ final class KeepsakeCompositor: NSObject, AVVideoCompositing, @unchecked Sendabl
     private let ciContext = CIContext(options: [.cacheIntermediates: false])
     private var renderContext: AVVideoCompositionRenderContext?
     private var isCancelled = false
+    private var cachedTitle: (key: String, image: CGImage)?
 
     #if compiler(>=6.0)
     var sourcePixelBufferAttributes: [String: any Sendable]? {
@@ -138,7 +139,7 @@ final class KeepsakeCompositor: NSObject, AVVideoCompositing, @unchecked Sendabl
         let showingTitle = instruction.title != nil && SyncMath.showsTitleCard(atMilliseconds: milliseconds, enabled: true)
 
         if showingTitle, let title = instruction.title,
-           let card = TitleCardRenderer.image(width: Int(width), height: Int(height), names: title.names, date: title.date) {
+           let card = titleCard(width: Int(width), height: Int(height), title: title) {
             var titleImage = CIImage(cgImage: card)
             let extent = titleImage.extent
             titleImage = titleImage.transformed(by: CGAffineTransform(translationX: -extent.origin.x, y: -extent.origin.y))
@@ -158,6 +159,18 @@ final class KeepsakeCompositor: NSObject, AVVideoCompositing, @unchecked Sendabl
 
         ciContext.render(image, to: output)
         request.finish(withComposedVideoFrame: output)
+    }
+
+    private func titleCard(width: Int, height: Int, title: TitleCardContent) -> CGImage? {
+        let key = "\(width)x\(height)|\(title.names)|\(title.date)"
+        if let cached = locked({ cachedTitle }), cached.key == key {
+            return cached.image
+        }
+        guard let image = TitleCardRenderer.image(width: width, height: height, names: title.names, date: title.date) else {
+            return nil
+        }
+        locked { cachedTitle = (key, image) }
+        return image
     }
 
     private func locked<T>(_ body: () -> T) -> T {

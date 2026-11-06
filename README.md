@@ -97,10 +97,15 @@ On **both** iPhones:
 8. If one person looks a little early or late, move **Nudge the other clip**. Each step is 0.05 seconds, and it only goes 2 seconds earlier or later. The start times do the bigger alignment.
 9. Tap **Play Preview**. If **Title card** is on, the names show for the first 3 seconds, then the two clips.
 10. Choose **Side by side** or **Stacked**.
-11. Tap **Make the Keepsake** and wait. A 10‑second recording takes a little while; longer recordings take longer.
-12. Tap **Watch**, or open the **Tapes** tab. You should see a thumbnail, the names, and the date. Tap **Play**, **Share**, or **Delete**. Delete asks you to confirm.
+11. Choose the sound. **Both** plays the two microphones together. Choose **This phone** or **Other phone** when you are in the same room, so the voices stay clear.
+12. Tap **Make the Keepsake** and wait. You can lock the phone or leave Keepsake for a short time while it finishes. Tap **Cancel** to stop. A 10‑second recording takes a little while; longer recordings take longer.
+13. Tap **Watch**, or open the **Tapes** tab. You should see a thumbnail of the two of you (after the title card, when that is on), the names, and the date. Tap **Play**, **Share**, or **Delete**. Delete asks you to confirm.
 
-The finished video is a 1080p H.264 MP4 saved only on that iPhone. Side by side is a wide 1920×1080 frame. Stacked is a tall 1080×1920 frame. Each person fills their half, and both soundtracks play together.
+The preview while you record matches the saved video. You look the way the other person saw you.
+
+If **Share** is off on a clip, the start time is not stored in the video yet. Tap **Repair**, then Share. AirDrop the repaired clip so the other phone can line the two up.
+
+The finished video is a 1080p H.264 MP4 saved only on that iPhone. Side by side is a wide 1920×1080 frame. Stacked is a tall 1080×1920 frame. Each person fills their half. The sound is whichever microphone you chose, or both. Keepsake asks iOS to leave these videos out of iCloud backup.
 
 ## If something goes wrong
 
@@ -110,5 +115,6 @@ The finished video is a 1080p H.264 MP4 saved only on that iPhone. Side by side 
 - **The phone is not in the list.** Unlock it, tap Trust, unplug and replug the cable, and choose it in the device menu at the top of Xcode.
 - **The app will not open after a week.** Plug it in and press Run again. That is the free Apple ID limit.
 - **Keepsake cannot see the camera.** Settings → Keepsake → turn Camera and Microphone on. Then tap Try Again on the Record screen.
+- **Share is off.** On the Clips tab, tap **Repair**, then Share. That stores the start time in the video.
 - **The two people are far out of sync.** Check that both phones use automatic date and time, and that you AirDropped the original clip (Share from the Clips tab) rather than a copy that Photos re-saved.
 - **There is no overlap.** The sync screen says so when the recordings do not cover the same moment. Record again, starting at about the same time.

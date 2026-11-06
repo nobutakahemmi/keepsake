@@ -1,0 +1,40 @@
+name: iOS
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Choose an iPhone simulator
+        id: simulator
+        run: |
+          set -euo pipefail
+          udid="$(python3 - <<'PY'
+          import json, subprocess, sys
+          raw = subprocess.check_output(["xcrun", "simctl", "list", "devices", "available", "-j"])
+          devices = json.loads(raw).get("devices", {})
+          for runtime, entries in devices.items():
+              if "iOS" not in runtime:
+                  continue
+              for device in entries:
+                  if device.get("isAvailable") and str(device.get("name", "")).startswith("iPhone"):
+                      print(device["udid"])
+                      sys.exit(0)
+          sys.exit("No available iPhone simulator")
+          PY
+          )"
+          echo "id=$udid" >> "$GITHUB_OUTPUT"
+
+      - name: Build and test
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -project Keepsake.xcodeproj \
+            -scheme Keepsake \
+            -destination "id=${{ steps.simulator.outputs.id }}" \
+            CODE_SIGNING_ALLOWED=NO

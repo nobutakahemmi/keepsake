@@ -278,3 +278,101 @@ final class SyncMathTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(fitted.maxY, target.maxY - 0.01, file: file, line: line)
     }
 }
+
+final class TimeFormatTests: XCTestCase {
+    func testDateTimeDoesNotRoundIntoTheNextSecond() {
+        let base: Int64 = 1_700_000_000_000
+        let whole = TimeFormat.dateTime(milliseconds: base)
+        let plus = TimeFormat.dateTime(milliseconds: base + 600)
+        XCTAssertTrue(whole.hasSuffix(".000"))
+        XCTAssertTrue(plus.hasSuffix(".600"))
+        XCTAssertEqual(whole.dropLast(4), plus.dropLast(4))
+    }
+
+    func testClockShowsHoursAfterSixtyMinutes() {
+        XCTAssertEqual(TimeFormat.clock(90), "1:30")
+        XCTAssertEqual(TimeFormat.clock(3600), "1:00:00")
+        XCTAssertEqual(TimeFormat.clock(3661), "1:01:01")
+    }
+}
+
+@MainActor
+final class LibraryStoreTests: XCTestCase {
+    func testReconcileRestoresAClipFromItsSidecar() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let clips = root.appendingPathComponent("Clips", isDirectory: true)
+        try FileManager.default.createDirectory(at: clips, withIntermediateDirectories: true)
+        let movie = clips.appendingPathComponent("orphan.mov")
+        try Data("not a movie".utf8).write(to: movie)
+        let start = Date(timeIntervalSince1970: 1_700_000_000)
+        try ClipMetadata.writeSidecar(
+            start: start,
+            displayName: "Ada",
+            beside: movie,
+            durationMilliseconds: 4_000,
+            metadataEmbedded: false
+        )
+
+        let store = LibraryStore(storageRoot: root)
+        XCTAssertEqual(store.clips.count, 1)
+        XCTAssertEqual(store.clips[0].displayName, "Ada")
+        XCTAssertEqual(store.clips[0].durationMilliseconds, 4_000)
+        XCTAssertFalse(store.clips[0].metadataEmbedded)
+        XCTAssertEqual(store.clips[0].startTimeSource, .sidecar)
+    }
+
+    func testMissingFileIsDroppedAndNewFilesSkipBackup() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source = root.appendingPathComponent("source.mov")
+        try Data("clip".utf8).write(to: source)
+        let store = LibraryStore(storageRoot: root)
+        let start = Date(timeIntervalSince1970: 1_700_000_100)
+        try store.addRecording(
+            RecordedClip(
+                url: source,
+                start: start,
+                displayName: "Bea",
+                duration: 2,
+                metadataEmbedded: true,
+                endedByInterruption: false
+            )
+        )
+        XCTAssertEqual(store.clips.count, 1)
+        let saved = store.clipURL(store.clips[0])
+        let savedValues = try saved.resourceValues(forKeys: [.isExcludedFromBackupKey])
+        XCTAssertEqual(savedValues.isExcludedFromBackup, true)
+        let folderValues = try saved.deletingLastPathComponent().resourceValues(forKeys: [.isExcludedFromBackupKey])
+        XCTAssertEqual(folderValues.isExcludedFromBackup, true)
+
+        try FileManager.default.removeItem(at: saved)
+        let reloaded = LibraryStore(storageRoot: root)
+        XCTAssertTrue(reloaded.clips.isEmpty)
+    }
+
+    func testOlderLibraryRowsDefaultToEmbeddedMetadata() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        _ = LibraryStore(storageRoot: root)
+
+        let fileName = "old.mov"
+        let movie = root.appendingPathComponent("Clips", isDirectory: true).appendingPathComponent(fileName)
+        try Data("old".utf8).write(to: movie)
+        let id = UUID().uuidString
+        let index = """
+        {"clips":[{"displayName":"Old","durationMilliseconds":1500,"fileName":"\(fileName)","id":"\(id)","imported":false,"startMilliseconds":1700000000000,"startTimeSource":"keepsakeMetadata"}],"tapes":[]}
+        """
+        try index.write(to: root.appendingPathComponent("library.json"), atomically: true, encoding: .utf8)
+
+        let reloaded = LibraryStore(storageRoot: root)
+        XCTAssertEqual(reloaded.clips.count, 1)
+        XCTAssertTrue(reloaded.clips[0].metadataEmbedded)
+        XCTAssertEqual(reloaded.clips[0].displayName, "Old")
+    }
+}
