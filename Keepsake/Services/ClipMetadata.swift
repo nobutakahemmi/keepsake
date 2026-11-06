@@ -146,7 +146,11 @@ enum ClipMetadata {
 
         if let metadata = try? await asset.load(.metadata) {
             for item in metadata {
-                guard let identifier = try? await item.load(.identifier) else { continue }
+                // `identifier` is derived from the item's key and is not an async property.
+                // Load those first so the identifier is filled in on the iOS 18 SDK.
+                _ = try? await item.load(.keySpace)
+                _ = try? await item.load(.key)
+                guard let identifier = item.identifier else { continue }
                 let stringValue = try? await item.load(.stringValue)
                 if matches(identifier, startIdentifier) {
                     if let stringValue, let date = TimestampCodec.date(fromStored: stringValue) {
